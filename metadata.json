@@ -1,0 +1,6 @@
+{
+  "name": "SmartPlanna",
+  "description": "Ứng dụng thông minh quản lý lịch trình học tập, làm việc, chi tiêu, du lịch và việc làm sinh viên tích hợp AI với giao diện tím ombre hồng pastel.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
