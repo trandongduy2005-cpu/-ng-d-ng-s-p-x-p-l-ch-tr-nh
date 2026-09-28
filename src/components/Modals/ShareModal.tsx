@@ -194,28 +194,36 @@ export const ShareModal: React.FC = () => {
           </div>
 
           <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1">
-            {collaborators.map((c, i) => (
-              <div
-                key={i}
-                className="p-2 rounded-xl bg-purple-50/60 border border-purple-100 flex items-center justify-between text-[11px]"
-              >
-                <div>
-                  <span className="font-bold text-slate-800">{c.name}</span>
-                  <span className="text-slate-400 block text-[10px]">{c.email}</span>
-                </div>
-                <span
-                  className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
-                    c.role === 'Owner'
-                      ? 'bg-purple-600 text-white'
-                      : c.role === 'Editor'
-                      ? 'bg-pink-100 text-pink-700'
-                      : 'bg-slate-200 text-slate-700'
-                  }`}
-                >
-                  {c.role}
-                </span>
+            {collaborators.length === 0 ? (
+              <div className="p-3 text-center text-slate-400 italic text-[11px] bg-purple-50/40 rounded-xl border border-dashed border-purple-200">
+                {isVi
+                  ? 'Chưa có thành viên nào. Bạn có thể gửi link chia sẻ phía trên hoặc nhập email bên dưới để mời đồng đội!'
+                  : 'No team members yet. Share the link above or invite via email below!'}
               </div>
-            ))}
+            ) : (
+              collaborators.map((c, i) => (
+                <div
+                  key={i}
+                  className="p-2 rounded-xl bg-purple-50/60 border border-purple-100 flex items-center justify-between text-[11px]"
+                >
+                  <div>
+                    <span className="font-bold text-slate-800">{c.name}</span>
+                    <span className="text-slate-400 block text-[10px]">{c.email}</span>
+                  </div>
+                  <span
+                    className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                      c.role === 'Owner'
+                        ? 'bg-purple-600 text-white'
+                        : c.role === 'Editor'
+                        ? 'bg-pink-100 text-pink-700'
+                        : 'bg-slate-200 text-slate-700'
+                    }`}
+                  >
+                    {c.role}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
 
           {/* Quick Invite input */}

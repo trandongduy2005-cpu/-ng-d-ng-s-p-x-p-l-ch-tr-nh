@@ -98,9 +98,29 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const LOCAL_STORAGE_PREFIX = 'smartplanna_';
+const LOCAL_STORAGE_PREFIX = 'smartplanna_v3_';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Clear any legacy mock data from previous sessions if present
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const legacyUser = localStorage.getItem('smartplanna_user');
+        if (legacyUser && legacyUser.includes('user-default-1')) {
+          localStorage.removeItem('smartplanna_user');
+          localStorage.removeItem('smartplanna_events');
+          localStorage.removeItem('smartplanna_tasks');
+          localStorage.removeItem('smartplanna_expenses');
+          localStorage.removeItem('smartplanna_bookings');
+          localStorage.removeItem('smartplanna_appliedJobs');
+          localStorage.removeItem('smartplanna_savedPlaces');
+        }
+      }
+    } catch (e) {
+      // Ignore storage errors
+    }
+  }, []);
+
   // 1. Language & Online status
   const [language, setLanguageState] = useState<'vi' | 'en'>(() => {
     return (localStorage.getItem(`${LOCAL_STORAGE_PREFIX}lang`) as 'vi' | 'en') || 'vi';
@@ -114,7 +134,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return localStorage.getItem(`${LOCAL_STORAGE_PREFIX}location`) || 'TP. Hồ Chí Minh, Việt Nam';
   });
 
-  // 2. User & Roles
+  // 2. User & Roles - Starts in clean, unauthenticated state
   const [user, setUser] = useState<UserProfile>(() => {
     const saved = localStorage.getItem(`${LOCAL_STORAGE_PREFIX}user`);
     return saved ? JSON.parse(saved) : INITIAL_USER;
@@ -127,7 +147,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // 3. Navigation
   const [activeTab, setActiveTab] = useState<'schedule' | 'tasks_expenses' | 'travel' | 'jobs'>('schedule');
 
-  // 4. Data lists
+  // 4. Data lists - Fresh, empty initial state
   const [events, setEvents] = useState<ScheduleEvent[]>(() => {
     const saved = localStorage.getItem(`${LOCAL_STORAGE_PREFIX}events`);
     return saved ? JSON.parse(saved) : INITIAL_EVENTS;
@@ -145,53 +165,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [monthlyBudget, setMonthlyBudgetState] = useState<number>(() => {
     const saved = localStorage.getItem(`${LOCAL_STORAGE_PREFIX}budget`);
-    return saved ? Number(saved) : 6000000; // 6 triệu VND default
+    return saved ? Number(saved) : 5000000; // 5 triệu VND initial budget
   });
 
   const [savedPlaces, setSavedPlaces] = useState<string[]>(() => {
     const saved = localStorage.getItem(`${LOCAL_STORAGE_PREFIX}savedPlaces`);
-    return saved ? JSON.parse(saved) : ['place-ld-1', 'place-dn-2'];
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [appliedJobs, setAppliedJobs] = useState<string[]>(() => {
     const saved = localStorage.getItem(`${LOCAL_STORAGE_PREFIX}appliedJobs`);
-    return saved ? JSON.parse(saved) : ['job-1'];
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [bookings, setBookings] = useState<BookingRecord[]>(() => {
     const saved = localStorage.getItem(`${LOCAL_STORAGE_PREFIX}bookings`);
-    return saved
-      ? JSON.parse(saved)
-      : [
-          {
-            id: 'book-1',
-            type: 'homestay',
-            placeName: 'Mây Lang Thang Homestay & Cafe',
-            placeAddress: 'Hẻm 7B Hoàng Hoa Thám, Phường 10, TP. Đà Lạt',
-            date: '2026-10-15',
-            details: 'Phòng Deluxe Thung Lũng Săn Mây, 2 đêm',
-            guestCount: 2,
-            contactName: 'Đông Duy Trần',
-            contactPhone: '0987654321',
-            status: 'confirmed',
-            totalPrice: '1.300.000đ',
-            createdAt: '2026-09-18T10:00:00.000Z',
-          },
-        ];
+    return saved ? JSON.parse(saved) : [];
   });
 
-  // 5. Sharing & Permissions
+  // 5. Sharing & Permissions - Clean initial config
   const [shareConfig, setShareConfig] = useState<ShareConfig>(() => {
     return {
-      id: 'planna-team-share-2026',
-      title: 'Lịch Học Tập & Làm Việc Nhóm SmartPlanna',
+      id: `planna-${Date.now().toString(36)}`,
+      title: 'Lịch Trình Cá Nhân & Làm Việc Nhóm SmartPlanna',
       permission: 'edit',
       createdDate: new Date().toISOString(),
-      collaborators: [
-        { name: 'Đông Duy Trần (Trưởng nhóm)', email: 'trandongduy2005@gmail.com', role: 'Owner' },
-        { name: 'Minh Anh (Sinh viên)', email: 'minhanh.cs@gmail.com', role: 'Editor' },
-        { name: 'Khánh Toàn (Nghệ sĩ / Guitarist)', email: 'toan.acoustic@gmail.com', role: 'Editor' },
-      ],
+      collaborators: [],
     };
   });
 
@@ -291,15 +290,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Auth methods
   const login = (method: 'google' | 'facebook' | 'phone', userData?: Partial<UserProfile>) => {
+    const avatarFallback =
+      method === 'google'
+        ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'
+        : method === 'facebook'
+        ? 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80'
+        : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80';
+
     const newUser: UserProfile = {
       id: `user-${Date.now()}`,
-      name: userData?.name || (method === 'google' ? 'Đông Duy Trần (Google)' : method === 'facebook' ? 'Đông Duy (Facebook)' : 'Người Dùng SmartPlanna'),
-      email: userData?.email || (method === 'phone' ? '0987654321@smartplanna.vn' : 'trandongduy2005@gmail.com'),
-      phone: userData?.phone || '0987654321',
-      avatar:
-        userData?.avatar ||
-        'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
-      role: selectedRole,
+      name: userData?.name?.trim() || (language === 'vi' ? 'Thành Viên SmartPlanna' : 'SmartPlanna User'),
+      email: userData?.email?.trim() || '',
+      phone: userData?.phone?.trim() || '',
+      avatar: userData?.avatar || avatarFallback,
+      role: userData?.role || selectedRole || 'student',
       loginMethod: method,
       isLoggedIn: true,
     };
@@ -309,14 +313,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const logout = () => {
     setUser({
-      id: 'guest',
-      name: 'Khách',
-      email: 'guest@smartplanna.vn',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-      role: 'all',
+      id: '',
+      name: '',
+      email: '',
+      phone: '',
+      avatar: '',
+      role: 'student',
       loginMethod: 'guest',
       isLoggedIn: false,
     });
+    localStorage.removeItem(`${LOCAL_STORAGE_PREFIX}user`);
   };
 
   const updateUserProfile = (profile: Partial<UserProfile>) => {
@@ -486,6 +492,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     });
 
+    if (todayEvents.length === 0) {
+      return {
+        studyWorkHours: 0,
+        restSleepHours: 7.0,
+        healthSportHours: 0,
+        personalSocialHours: 2.0,
+        balanceScore: 75,
+        aiAdvice:
+          language === 'vi'
+            ? 'Chào mừng bạn đến với SmartPlanna! Hãy thêm các hoạt động học tập, làm việc, tập gym hoặc nghỉ ngơi để AI tự động phân tích và tối ưu hóa mức độ cân bằng cuộc sống của bạn.'
+            : 'Welcome to SmartPlanna! Add study, gym or daily activities so AI can analyze and balance your day.',
+      };
+    }
+
     const studyWorkHours = Number((studyWorkMinutes / 60).toFixed(1));
     const restSleepHours = Number((routineMinutes / 60 + 7).toFixed(1)); // Baseline sleep added
     const healthSportHours = Number((healthMinutes / 60).toFixed(1));
@@ -497,11 +517,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (studyWorkHours > 10) score -= 20; // Burnout warning
     if (restSleepHours < 6) score -= 15;
 
-    let aiAdvice = 'Lịch trình hôm nay của bạn rất cân bằng! Hãy giữ vững năng lượng này.';
+    let aiAdvice = language === 'vi' ? 'Lịch trình hôm nay của bạn rất cân bằng! Hãy giữ vững năng lượng này.' : 'Your schedule today is well-balanced! Keep up the great pace.';
     if (healthSportHours === 0) {
-      aiAdvice = 'Gợi ý AI: Bạn chưa có hoạt động vận động hôm nay. Hãy thêm 30 phút tập gym, chạy bộ hoặc nhảy để giải phóng endorphin!';
+      aiAdvice = language === 'vi' ? 'Gợi ý AI: Bạn chưa có hoạt động vận động hôm nay. Hãy thêm 30 phút tập gym, chạy bộ hoặc nhảy để giải phóng endorphin!' : 'AI tip: No workout logged yet. Add 30 mins of gym or dance!';
     } else if (studyWorkHours > 8) {
-      aiAdvice = 'Cảnh báo AI: Giờ học tập và làm việc khá cao. Hãy nhớ áp dụng kỹ thuật Pomodoro (nghỉ 5 phút sau mỗi 25 phút) để tránh kiệt sức.';
+      aiAdvice = language === 'vi' ? 'Cảnh báo AI: Giờ học tập và làm việc khá cao. Hãy nhớ áp dụng kỹ thuật Pomodoro (nghỉ 5 phút sau mỗi 25 phút) để tránh kiệt sức.' : 'AI alert: High focus hours. Take 5 min breaks every 25 mins.';
     }
 
     return {

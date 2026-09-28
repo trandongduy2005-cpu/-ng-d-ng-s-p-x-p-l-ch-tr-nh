@@ -19,8 +19,8 @@ export const BookingModal: React.FC = () => {
   const place = bookingTarget?.place;
   const bookingType = bookingTarget?.type || 'homestay';
 
-  const [contactName, setContactName] = useState(user.isLoggedIn ? user.name : 'Đông Duy');
-  const [contactPhone, setContactPhone] = useState(user.phone || '0987654321');
+  const [contactName, setContactName] = useState(user.isLoggedIn ? user.name : '');
+  const [contactPhone, setContactPhone] = useState(user.phone || '');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [time, setTime] = useState('14:00');
   const [guestCount, setGuestCount] = useState(2);
@@ -158,6 +158,7 @@ export const BookingModal: React.FC = () => {
                   <input
                     type="text"
                     required
+                    placeholder={isVi ? 'VD: Nguyễn Văn A' : 'Full Name'}
                     value={contactName}
                     onChange={(e) => setContactName(e.target.value)}
                     className="w-full px-3 py-2 rounded-xl border border-purple-200 bg-purple-50/30 font-medium"
@@ -171,6 +172,7 @@ export const BookingModal: React.FC = () => {
                   <input
                     type="tel"
                     required
+                    placeholder={isVi ? 'VD: 0912 345 678' : '0912 345 678'}
                     value={contactPhone}
                     onChange={(e) => setContactPhone(e.target.value)}
                     className="w-full px-3 py-2 rounded-xl border border-purple-200 bg-purple-50/30 font-medium"

@@ -42,13 +42,13 @@ export const JobsView: React.FC = () => {
 
   // Application Form
   const [applyForm, setApplyForm] = useState({
-    fullName: user.isLoggedIn ? user.name : 'Đông Duy Trần',
-    phone: user.phone || '0987654321',
-    email: user.email || 'trandongduy2005@gmail.com',
-    university: 'Đại học Quốc gia / Đại học tại Việt Nam',
-    major: 'Công nghệ thông tin / Quản trị kinh doanh',
-    availableDays: 'Các buổi tối trong tuần & Thứ 7, Chủ Nhật',
-    intro: 'Em là sinh viên chăm chỉ, có tinh thần trách nhiệm cao, muốn tìm việc làm thêm để tích lũy kinh nghiệm.',
+    fullName: user.isLoggedIn ? user.name : '',
+    phone: user.phone || '',
+    email: user.email || '',
+    university: '',
+    major: '',
+    availableDays: '',
+    intro: '',
   });
 
   const [applySuccessToast, setApplySuccessToast] = useState<string | null>(null);
@@ -386,6 +386,7 @@ export const JobsView: React.FC = () => {
                 <input
                   type="text"
                   required
+                  placeholder={isVi ? 'VD: Nguyễn Văn A' : 'Full Name'}
                   value={applyForm.fullName}
                   onChange={(e) => setApplyForm({ ...applyForm, fullName: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl border border-purple-200 bg-purple-50/30 font-medium"
@@ -400,6 +401,7 @@ export const JobsView: React.FC = () => {
                   <input
                     type="tel"
                     required
+                    placeholder="0912 345 678"
                     value={applyForm.phone}
                     onChange={(e) => setApplyForm({ ...applyForm, phone: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl border border-purple-200 bg-purple-50/30 font-medium"
@@ -413,6 +415,7 @@ export const JobsView: React.FC = () => {
                   <input
                     type="email"
                     required
+                    placeholder="emailcuaban@gmail.com"
                     value={applyForm.email}
                     onChange={(e) => setApplyForm({ ...applyForm, email: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl border border-purple-200 bg-purple-50/30 font-medium"
@@ -427,6 +430,7 @@ export const JobsView: React.FC = () => {
                   </label>
                   <input
                     type="text"
+                    placeholder={isVi ? 'VD: ĐH Quốc Gia, ĐH Bách Khoa...' : 'University name'}
                     value={applyForm.university}
                     onChange={(e) => setApplyForm({ ...applyForm, university: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl border border-purple-200 bg-purple-50/30"
@@ -439,6 +443,7 @@ export const JobsView: React.FC = () => {
                   </label>
                   <input
                     type="text"
+                    placeholder={isVi ? 'VD: Tối T2, T4, T6 hoặc cuối tuần' : 'e.g. Mon, Wed evenings'}
                     value={applyForm.availableDays}
                     onChange={(e) => setApplyForm({ ...applyForm, availableDays: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl border border-purple-200 bg-purple-50/30"
@@ -452,6 +457,11 @@ export const JobsView: React.FC = () => {
                 </label>
                 <textarea
                   rows={3}
+                  placeholder={
+                    isVi
+                      ? 'VD: Em là sinh viên chăm chỉ, nhanh nhẹn, mong muốn tìm việc làm thêm để rèn luyện kỹ năng...'
+                      : 'Brief introduction about your schedule and experience...'
+                  }
                   value={applyForm.intro}
                   onChange={(e) => setApplyForm({ ...applyForm, intro: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl border border-purple-200 bg-purple-50/30"
