@@ -99,6 +99,8 @@ export interface Province {
   famousDishes: string[];
   bestSeasons: string;
   placesCount?: number;
+  lat: number;
+  lng: number;
 }
 
 export interface JobOpportunity {
