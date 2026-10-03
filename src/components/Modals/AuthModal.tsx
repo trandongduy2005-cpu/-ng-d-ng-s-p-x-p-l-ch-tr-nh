@@ -11,7 +11,7 @@ import {
   signInWithPhoneNumber,
   type ConfirmationResult,
 } from '../../lib/firebase';
-import { updateProfile } from 'firebase/auth';
+import { updateProfile, FacebookAuthProvider } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import {
   User,
@@ -214,25 +214,43 @@ export const AuthModal: React.FC = () => {
     }
   };
 
-  // 2. REAL FACEBOOK LOGIN VIA OFFICIAL FACEBOOK OAUTH POPUP
-  const handleFacebookSignIn = async () => {
+  // 2. REAL FACEBOOK LOGIN VIA OFFICIAL FIREBASE WEB SDK v9+
+  const handleFacebookLogin = async () => {
+    const provider = new FacebookAuthProvider();
+    // Yêu cầu quyền lấy email và thông tin cá nhân cơ bản
+    provider.addScope('email');
+    provider.addScope('public_profile');
+
     setIsLoading(true);
     setLoadingText(isVi ? 'Đang mở cửa sổ đăng nhập Facebook...' : 'Connecting to Facebook...');
     setErrorMessage(null);
     setSuccessMessage(null);
 
     try {
-      const result = await signInWithPopup(auth, facebookProvider);
-      const fbUser = result.user;
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      console.log('Đăng nhập Facebook thành công:', user);
 
+      // Lưu thông tin người dùng và chuyển giao diện
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          displayName: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+          uid: user.uid,
+        })
+      );
+
+      // Cập nhật Firestore
       try {
         await setDoc(
-          doc(db, 'users', fbUser.uid),
+          doc(db, 'users', user.uid),
           {
-            id: fbUser.uid,
-            name: fbUser.displayName || 'Người dùng Facebook',
-            email: fbUser.email || '',
-            avatar: fbUser.photoURL || '',
+            id: user.uid,
+            name: user.displayName || 'Người dùng Facebook',
+            email: user.email || '',
+            avatar: user.photoURL || '',
             role: role,
             loginMethod: 'facebook',
             lastLoginAt: new Date().toISOString(),
@@ -247,55 +265,66 @@ export const AuthModal: React.FC = () => {
       confetti({ particleCount: 50, spread: 70 });
       setSuccessMessage(
         isVi
-          ? `Đăng nhập Facebook thành công! Xin chào ${fbUser.displayName}`
-          : `Signed in successfully as ${fbUser.displayName}`
+          ? `Chào mừng ${user.displayName || 'bạn'}!`
+          : `Welcome ${user.displayName || 'User'}!`
       );
+
+      // Gọi hàm chuyển giao diện đăng nhập thành công ở đây
+      try {
+        if (typeof window !== 'undefined' && typeof window.alert === 'function') {
+          window.alert(`Chào mừng ${user.displayName}!`);
+        }
+      } catch {}
 
       setTimeout(() => {
         handleClose();
-      }, 1200);
-    } catch (err: any) {
-      console.error('Facebook Sign-In Error:', err);
-      if (err.code === 'auth/popup-closed-by-user') {
+      }, 1000);
+    } catch (error: any) {
+      console.error('Lỗi đăng nhập Facebook:', error.code, error.message);
+      if (error.code === 'auth/popup-closed-by-user') {
         setErrorMessage(
           isVi
-            ? 'Bạn đã đóng cửa sổ đăng nhập Facebook trước khi hoàn tất xác thực.'
-            : 'Facebook sign-in window closed before completion.'
+            ? 'Bạn đã đóng cửa sổ đăng nhập.'
+            : 'Sign-in window closed by user.'
         );
-      } else if (err.code === 'auth/account-exists-with-different-credential') {
-        setErrorMessage(
-          isVi
-            ? 'Email liên kết với tài khoản Facebook này đã được đăng ký bằng phương thức khác (như Google).'
-            : 'Account exists with a different credential.'
-        );
-      } else if (err.code === 'auth/operation-not-allowed') {
-        setErrorMessage(
-          isVi
-            ? 'Đăng nhập Facebook yêu cầu cấu hình Meta App ID trong Firebase Console. Vui lòng sử dụng Google hoặc Số điện thoại.'
-            : 'Facebook provider needs Meta App credentials in Firebase Console.'
-        );
-      } else if (err.code === 'auth/unauthorized-domain') {
+        try {
+          if (typeof window !== 'undefined' && typeof window.alert === 'function') {
+            window.alert('Bạn đã đóng cửa sổ đăng nhập.');
+          }
+        } catch {}
+      } else if (error.code === 'auth/unauthorized-domain') {
         const currentHost = window.location.hostname || 'localhost';
         setUnauthorizedDomain(currentHost);
         setFailedProvider('facebook');
         setErrorMessage(
           isVi
-            ? `Tên miền "${currentHost}" chưa được cấp quyền trong Firebase Console (Authorized Domains).`
-            : `Domain "${currentHost}" is not in Firebase Authorized Domains.`
+            ? 'Tên miền chưa được cấp quyền trong Firebase Console.'
+            : 'Domain unauthorized in Firebase Console.'
         );
+        try {
+          if (typeof window !== 'undefined' && typeof window.alert === 'function') {
+            window.alert('Tên miền chưa được cấp quyền trong Firebase Console.');
+          }
+        } catch {}
       } else {
         setErrorMessage(
-          err.message ||
-            (isVi
-              ? 'Đăng nhập Facebook thất bại. Vui lòng thử lại.'
-              : 'Facebook sign-in failed. Please retry.')
+          isVi
+            ? 'Đăng nhập thất bại: ' + (error.message || 'Lỗi không xác định')
+            : 'Sign-in failed: ' + error.message
         );
+        try {
+          if (typeof window !== 'undefined' && typeof window.alert === 'function') {
+            window.alert('Đăng nhập thất bại: ' + error.message);
+          }
+        } catch {}
       }
     } finally {
       setIsLoading(false);
       setLoadingText('');
     }
   };
+
+  const handleFacebookSignIn = handleFacebookLogin;
 
   // 3. REAL PHONE AUTHENTICATION VIA FIREBASE RECAPTCHA & REAL SMS OTP
   const setupRecaptchaVerifier = () => {
@@ -822,7 +851,7 @@ export const AuthModal: React.FC = () => {
                 {/* Method 2: Real Facebook Login */}
                 <button
                   type="button"
-                  onClick={handleFacebookSignIn}
+                  onClick={handleFacebookLogin}
                   disabled={isLoading}
                   className="w-full py-2.5 px-4 rounded-2xl bg-[#1877F2] hover:bg-[#166fe5] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-3 transition cursor-pointer shadow-2xs disabled:opacity-60"
                 >

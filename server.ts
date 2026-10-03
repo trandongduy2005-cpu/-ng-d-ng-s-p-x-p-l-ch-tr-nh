@@ -151,6 +151,39 @@ Yêu cầu phản hồi dạng JSON hợp lệ với cấu trúc:
   }
 });
 
+// Google Places API Text Search Proxy (bypasses browser CORS)
+app.post("/api/places/search", async (req, res) => {
+  try {
+    const { query, apiKey } = req.body;
+    const key = apiKey || process.env.VITE_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
+
+    if (!query) {
+      res.status(400).json({ error: "Query is required" });
+      return;
+    }
+
+    if (!key || key === "YOUR_API_KEY") {
+      res.json({
+        status: "NO_API_KEY",
+        message: "API key is placeholder. Falling back to local data.",
+        results: [],
+      });
+      return;
+    }
+
+    const gUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(
+      query
+    )}&language=vi&key=${encodeURIComponent(key)}`;
+
+    const response = await fetch(gUrl);
+    const data = await response.json();
+    res.json(data);
+  } catch (error: any) {
+    console.error("Google Places Search Proxy Error:", error);
+    res.status(500).json({ error: "Lỗi gọi Google Places API", details: error?.message });
+  }
+});
+
 // Start server with Vite middleware in dev or static files in production
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
