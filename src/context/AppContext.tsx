@@ -15,6 +15,9 @@ import {
   INITIAL_TASKS,
   INITIAL_EXPENSES,
 } from '../data/initialData';
+import { auth, db } from '../lib/firebase';
+import { onAuthStateChanged, signOut, User as FirebaseUser } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 export interface BookingRecord {
   id: string;
@@ -276,6 +279,71 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, []);
 
+  // Real Firebase Auth state listener
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser: FirebaseUser | null) => {
+      if (fbUser) {
+        const providerId = fbUser.providerData[0]?.providerId;
+        const loginMethod: 'google' | 'facebook' | 'phone' =
+          providerId === 'google.com'
+            ? 'google'
+            : providerId === 'facebook.com'
+            ? 'facebook'
+            : 'phone';
+
+        let userRole: RoleType = selectedRole || 'student';
+        let userDisplayName = fbUser.displayName || fbUser.phoneNumber || 'Người Dùng SmartPlanna';
+        let userAvatar =
+          fbUser.photoURL ||
+          `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(userDisplayName)}&backgroundColor=8b5cf6,ec4899`;
+
+        try {
+          const userDocRef = doc(db, 'users', fbUser.uid);
+          const snap = await getDoc(userDocRef);
+          if (snap.exists()) {
+            const data = snap.data();
+            if (data.role) userRole = data.role as RoleType;
+            if (data.name) userDisplayName = data.name;
+            if (data.avatar) userAvatar = data.avatar;
+          } else {
+            await setDoc(
+              userDocRef,
+              {
+                id: fbUser.uid,
+                name: userDisplayName,
+                email: fbUser.email || '',
+                phone: fbUser.phoneNumber || '',
+                avatar: userAvatar,
+                role: userRole,
+                loginMethod: loginMethod,
+                createdAt: new Date().toISOString(),
+              },
+              { merge: true }
+            );
+          }
+        } catch (e) {
+          console.warn('Firestore user fetch note:', e);
+        }
+
+        setSelectedRole(userRole);
+        setUser({
+          id: fbUser.uid,
+          name: userDisplayName,
+          email: fbUser.email || '',
+          phone: fbUser.phoneNumber || '',
+          avatar: userAvatar,
+          role: userRole,
+          loginMethod: loginMethod,
+          isLoggedIn: true,
+        });
+      } else {
+        setUser(INITIAL_USER);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [selectedRole]);
+
   const setLanguage = (lang: 'vi' | 'en') => {
     setLanguageState(lang);
   };
@@ -290,43 +358,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Auth methods
   const login = (method: 'google' | 'facebook' | 'phone', userData?: Partial<UserProfile>) => {
-    const avatarFallback =
-      method === 'google'
-        ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'
-        : method === 'facebook'
-        ? 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80'
-        : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80';
-
-    const newUser: UserProfile = {
-      id: `user-${Date.now()}`,
-      name: userData?.name?.trim() || (language === 'vi' ? 'Thành Viên SmartPlanna' : 'SmartPlanna User'),
-      email: userData?.email?.trim() || '',
-      phone: userData?.phone?.trim() || '',
-      avatar: userData?.avatar || avatarFallback,
-      role: userData?.role || selectedRole || 'student',
-      loginMethod: method,
-      isLoggedIn: true,
-    };
-    setUser(newUser);
+    if (userData) {
+      setUser((prev) => ({
+        ...prev,
+        ...userData,
+        isLoggedIn: true,
+        loginMethod: method,
+      }));
+    }
     setIsAuthModalOpen(false);
   };
 
-  const logout = () => {
-    setUser({
-      id: '',
-      name: '',
-      email: '',
-      phone: '',
-      avatar: '',
-      role: 'student',
-      loginMethod: 'guest',
-      isLoggedIn: false,
-    });
+  const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.warn('SignOut error:', e);
+    }
+    setUser(INITIAL_USER);
     localStorage.removeItem(`${LOCAL_STORAGE_PREFIX}user`);
   };
 
-  const updateUserProfile = (profile: Partial<UserProfile>) => {
+  const updateUserProfile = async (profile: Partial<UserProfile>) => {
     setUser((prev) => ({ ...prev, ...profile }));
+    if (auth.currentUser) {
+      try {
+        await setDoc(doc(db, 'users', auth.currentUser.uid), profile, { merge: true });
+      } catch (e) {
+        console.warn('Failed to update Firestore profile doc:', e);
+      }
+    }
   };
 
   // Schedule Event methods
