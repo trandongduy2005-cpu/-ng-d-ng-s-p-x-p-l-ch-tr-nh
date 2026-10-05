@@ -50,14 +50,14 @@ export const AIAssistantModal: React.FC = () => {
       id: 'welcome',
       role: 'assistant',
       content: isVi
-        ? `Xin chào! Tôi là Trợ lý AI SmartPlanna của bạn 🌟. Tôi có thể hỗ trợ bạn:
+        ? `Xin chào! Tôi là Trợ lý AI SmartPlanner của bạn 🌟. Tôi có thể hỗ trợ bạn:
 • Sắp xếp lịch học tập, ca làm thêm, giờ ăn ngủ và tập gym cân bằng.
 • Lên kế hoạch rehearsal và show diễn cho nghệ sĩ.
 • Gợi ý homestay, món ngon địa phương tại ${currentLocation}.
 • Tìm kiếm việc làm sinh viên linh hoạt ca làm.
 
 Hôm nay bạn cần tôi hỗ trợ sắp xếp điều gì?`
-        : `Hello! I am your SmartPlanna AI Assistant 🌟. I can help you schedule classes, manage study/life balance, organize artist shows, recommend travel spots, and find student jobs. How can I assist you today?`,
+        : `Hello! I am your SmartPlanner AI Assistant 🌟. I can help you schedule classes, manage study/life balance, organize artist shows, recommend travel spots, and find student jobs. How can I assist you today?`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -173,7 +173,7 @@ Hôm nay bạn cần tôi hỗ trợ sắp xếp điều gì?`
     eventsToApply.forEach((ev) => {
       addEvent({
         title: ev.title,
-        description: ev.description || 'Gợi ý thông minh từ Trợ lý AI SmartPlanna',
+        description: ev.description || 'Gợi ý thông minh từ Trợ lý AI SmartPlanner',
         category: ev.category || 'study',
         date: today,
         startTime: ev.startTime || '08:00',
@@ -202,7 +202,7 @@ Hôm nay bạn cần tôi hỗ trợ sắp xếp điều gì?`
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-extrabold text-base leading-tight">
-                  {isVi ? 'Trợ Lý AI SmartPlanna' : 'SmartPlanna AI Assistant'}
+                  {isVi ? 'Trợ Lý AI SmartPlanner' : 'SmartPlanner AI Assistant'}
                 </h3>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-pink-100">
                   Gemini Flash

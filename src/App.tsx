@@ -42,7 +42,7 @@ const AppContent: React.FC = () => {
               <Sparkles className="w-3.5 h-3.5" />
             </div>
             <span className="font-extrabold bg-gradient-to-r from-purple-700 to-pink-600 bg-clip-text text-transparent text-sm">
-              SmartPlanna
+              SmartPlanner
             </span>
             <span className="text-slate-300">•</span>
             <span>
@@ -58,7 +58,7 @@ const AppContent: React.FC = () => {
               <span>{isVi ? 'Dành cho Học sinh, Sinh viên & Nghệ sĩ' : 'For Students, Artists & Everyone'}</span>
             </span>
             <span className="text-slate-300">•</span>
-            <span>© 2026 SmartPlanna</span>
+            <span>© 2026 SmartPlanner</span>
           </div>
         </div>
       </footer>

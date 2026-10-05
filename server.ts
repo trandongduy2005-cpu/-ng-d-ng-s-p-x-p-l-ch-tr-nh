@@ -35,7 +35,7 @@ function getGenAI(): GoogleGenAI | null {
 app.get("/api/health", (_req, res) => {
   res.json({
     status: "ok",
-    appName: "SmartPlanna",
+    appName: "SmartPlanner",
     hasApiKey: Boolean(process.env.GEMINI_API_KEY),
     time: new Date().toISOString(),
   });
@@ -55,24 +55,24 @@ app.post("/api/gemini/chat", async (req, res) => {
     if (!ai) {
       // Intelligent fallback when API key is missing
       const fallbackRepliesVi = [
-        `Xin chào! Tôi là Trợ lý AI SmartPlanna. Để tối ưu hóa lịch học và công việc của bạn, hãy ưu tiên chia thời gian thành các khối 45-90 phút (Pomodoro/Time-blocking).`,
+        `Xin chào! Tôi là Trợ lý AI SmartPlanner. Để tối ưu hóa lịch học và công việc của bạn, hãy ưu tiên chia thời gian thành các khối 45-90 phút (Pomodoro/Time-blocking).`,
         `Gợi ý lịch trình: Buổi sáng dành cho học tập/sáng tạo sâu, buổi chiều cho làm việc nhóm/thực hành, và buổi tối dành 1 giờ tập gym hoặc giải trí trước khi nghỉ ngơi.`,
         `Về quản lý chi tiêu: Hãy áp dụng quy tắc 50/30/20 (50% sinh hoạt thiết yếu, 30% phát triển & giải trí, 20% tiết kiệm dự phòng).`,
       ];
       const fallbackRepliesEn = [
-        `Hello! I'm your SmartPlanna AI Assistant. To optimize your schedule, try time-blocking in 45-90 minute focus blocks.`,
+        `Hello! I'm your SmartPlanner AI Assistant. To optimize your schedule, try time-blocking in 45-90 minute focus blocks.`,
         `Routine recommendation: Dedicate morning to deep study or creative work, afternoon for collaboration, and evening for gym or rest.`,
       ];
       const replies = language === "en" ? fallbackRepliesEn : fallbackRepliesVi;
       const randomReply = replies[Math.floor(Math.random() * replies.length)];
       res.json({
-        reply: `${randomReply}\n\n*(Chế độ ngoại tuyến / Trả lời tự động của SmartPlanna)*`,
+        reply: `${randomReply}\n\n*(Chế độ ngoại tuyến / Trả lời tự động của SmartPlanner)*`,
         source: "offline_fallback",
       });
       return;
     }
 
-    const systemPrompt = `Bạn là Trợ lý AI thông minh tích hợp trong ứng dụng "SmartPlanna" - nền tảng đa năng hàng đầu dành cho học sinh, sinh viên, người đi làm, nghệ sĩ để:
+    const systemPrompt = `Bạn là Trợ lý AI thông minh tích hợp trong ứng dụng "SmartPlanner" - nền tảng đa năng hàng đầu dành cho học sinh, sinh viên, người đi làm, nghệ sĩ để:
 1. Sắp xếp lịch học, lịch làm việc, lịch sinh hoạt (ăn uống, ngủ nghỉ, gym, nhảy, tập luyện, nghệ sĩ đi show).
 2. Quản lý công việc và theo dõi chi tiêu, cân bằng cuộc sống.
 3. Gợi ý du lịch, địa điểm tại các tỉnh thành Việt Nam (homestay, nhà hàng, quán ăn, lịch trình di chuyển).
@@ -83,14 +83,14 @@ Thông tin người dùng hiện tại: ${JSON.stringify(userProfile || {})}`;
     // Format prompt with context
     const fullPrompt = `${systemPrompt}\n\nLịch sử trò chuyện gần đây:\n${history
       .map((h: { role: string; text: string }) => `${h.role}: ${h.text}`)
-      .join("\n")}\n\nNgười dùng: ${message}\nSmartPlanna AI:`;
+      .join("\n")}\n\nNgười dùng: ${message}\nSmartPlanner AI:`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3.8-flash",
       contents: fullPrompt,
     });
 
-    const reply = response.text || "SmartPlanna đã nhận yêu cầu của bạn!";
+    const reply = response.text || "SmartPlanner đã nhận yêu cầu của bạn!";
     res.json({ reply, source: "gemini-3.8-flash" });
   } catch (error: any) {
     console.error("Gemini Chat API Error:", error);
@@ -201,7 +201,7 @@ async function startServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`SmartPlanna Server running on http://0.0.0.0:${PORT}`);
+    console.log(`SmartPlanner Server running on http://0.0.0.0:${PORT}`);
   });
 }
 

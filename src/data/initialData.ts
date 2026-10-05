@@ -1,7 +1,7 @@
 import { ScheduleEvent, TaskItem, ExpenseItem, UserProfile } from '../types';
 
 /**
- * Clean & Fresh Initial State for SmartPlanna
+ * Clean & Fresh Initial State for SmartPlanner
  * Brand new user session - no pre-filled personal data.
  * Ready for the user to start from scratch and log in with their actual personal info.
  */

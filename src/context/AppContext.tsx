@@ -190,7 +190,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [shareConfig, setShareConfig] = useState<ShareConfig>(() => {
     return {
       id: `planna-${Date.now().toString(36)}`,
-      title: 'Lịch Trình Cá Nhân & Làm Việc Nhóm SmartPlanna',
+      title: 'Lịch Trình Cá Nhân & Làm Việc Nhóm SmartPlanner',
       permission: 'edit',
       createdDate: new Date().toISOString(),
       collaborators: [],
@@ -292,7 +292,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             : 'phone';
 
         let userRole: RoleType = selectedRole || 'student';
-        let userDisplayName = fbUser.displayName || fbUser.phoneNumber || 'Người Dùng SmartPlanna';
+        let userDisplayName = fbUser.displayName || fbUser.phoneNumber || 'Người Dùng SmartPlanner';
         let userAvatar =
           fbUser.photoURL ||
           `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(userDisplayName)}&backgroundColor=8b5cf6,ec4899`;
@@ -562,8 +562,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         balanceScore: 75,
         aiAdvice:
           language === 'vi'
-            ? 'Chào mừng bạn đến với SmartPlanna! Hãy thêm các hoạt động học tập, làm việc, tập gym hoặc nghỉ ngơi để AI tự động phân tích và tối ưu hóa mức độ cân bằng cuộc sống của bạn.'
-            : 'Welcome to SmartPlanna! Add study, gym or daily activities so AI can analyze and balance your day.',
+            ? 'Chào mừng bạn đến với SmartPlanner! Hãy thêm các hoạt động học tập, làm việc, tập gym hoặc nghỉ ngơi để AI tự động phân tích và tối ưu hóa mức độ cân bằng cuộc sống của bạn.'
+            : 'Welcome to SmartPlanner! Add study, gym or daily activities so AI can analyze and balance your day.',
       };
     }
 

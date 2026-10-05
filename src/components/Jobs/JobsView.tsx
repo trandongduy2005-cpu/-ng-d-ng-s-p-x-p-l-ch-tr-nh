@@ -90,7 +90,7 @@ export const JobsView: React.FC = () => {
     setSelectedJobForModal(null);
   };
 
-  // Add work schedule to SmartPlanna
+  // Add work schedule to SmartPlanner
   const handleAddWorkShiftToSchedule = (job: JobOpportunity) => {
     const today = new Date().toISOString().split('T')[0];
     const workingHoursText = job.workingHours || `${job.shiftTimes.start} - ${job.shiftTimes.end}`;
@@ -144,7 +144,7 @@ export const JobsView: React.FC = () => {
             </h1>
             <p className="text-purple-100 text-xs sm:text-sm max-w-2xl leading-relaxed">
               {isVi
-                ? 'Tìm việc làm thêm uy tín (Barista, gia sư, trợ lý, content, bán hàng) không lo trùng lịch học. Hỗ trợ nộp hồ sơ nhanh trực tiếp và đồng bộ ca làm vào lịch trình SmartPlanna.'
+                ? 'Tìm việc làm thêm uy tín (Barista, gia sư, trợ lý, content, bán hàng) không lo trùng lịch học. Hỗ trợ nộp hồ sơ nhanh trực tiếp và đồng bộ ca làm vào lịch trình SmartPlanner.'
                 : 'Find verified part-time student jobs with flexible scheduling that fits around your classes. Apply directly and sync your work shifts to your calendar.'}
             </p>
           </div>

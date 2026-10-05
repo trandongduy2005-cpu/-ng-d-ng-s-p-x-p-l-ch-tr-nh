@@ -621,7 +621,7 @@ export const AuthModal: React.FC = () => {
                     ? (fullName.trim() || 'Người dùng Google')
                     : provider === 'facebook'
                     ? (fullName.trim() || 'Người dùng Facebook')
-                    : (fullName.trim() || 'Thành viên SmartPlanna');
+                    : (fullName.trim() || 'Thành viên SmartPlanner');
                   login(provider, {
                     name: defaultName,
                     email: provider === 'google' ? (fullName ? `${fullName.toLowerCase().replace(/\s+/g, '')}@gmail.com` : 'user@gmail.com') : '',

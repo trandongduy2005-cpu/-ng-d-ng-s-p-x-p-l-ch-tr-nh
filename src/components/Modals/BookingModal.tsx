@@ -97,7 +97,7 @@ export const BookingModal: React.FC = () => {
 
             <p className="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
               {isVi
-                ? `Yêu cầu đặt ${bookingType === 'homestay' ? 'phòng homestay' : bookingType === 'table' ? 'bàn ăn' : 'phương tiện di chuyển'} tại "${place.name}" đã được xác nhận. Chúng tôi đã gửi xác nhận đến SĐT ${contactPhone} và tự động thêm vào Lịch Trình SmartPlanna của bạn!`
+                ? `Yêu cầu đặt ${bookingType === 'homestay' ? 'phòng homestay' : bookingType === 'table' ? 'bàn ăn' : 'phương tiện di chuyển'} tại "${place.name}" đã được xác nhận. Chúng tôi đã gửi xác nhận đến SĐT ${contactPhone} và tự động thêm vào Lịch Trình SmartPlanner của bạn!`
                 : `Your reservation at "${place.name}" has been confirmed and synced to your schedule.`}
             </p>
 

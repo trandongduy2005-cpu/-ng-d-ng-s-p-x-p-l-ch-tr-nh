@@ -36,7 +36,7 @@ export async function testFirestoreConnection() {
     await getDocFromServer(doc(db, 'test', 'connection'));
   } catch (error) {
     if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.warn('SmartPlanna: Firestore offline or checking connection.');
+      console.warn('SmartPlanner: Firestore offline or checking connection.');
     }
   }
 }

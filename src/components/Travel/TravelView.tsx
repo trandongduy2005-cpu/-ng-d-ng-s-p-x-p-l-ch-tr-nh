@@ -140,7 +140,7 @@ export interface GooglePlaceResult {
   opening_hours?: {
     open_now?: boolean;
   };
-  // Thuộc tính phụ trợ phục vụ SmartPlanna
+  // Thuộc tính phụ trợ phục vụ SmartPlanner
   category?: 'homestay' | 'restaurant' | 'attraction';
   simulatedPriceVND?: string;
   description?: string;
@@ -541,7 +541,7 @@ export const TravelView: React.FC = () => {
     fetchGooglePlaces(selectedProvince, activeTab, searchQuery);
   };
 
-  // Thêm sự kiện vào Lịch trình SmartPlanna
+  // Thêm sự kiện vào Lịch trình SmartPlanner
   const handleAddToSchedule = (place: GooglePlaceResult) => {
     const today = new Date().toISOString().split('T')[0];
     addEvent({
@@ -582,7 +582,7 @@ export const TravelView: React.FC = () => {
         </div>
       )}
 
-      {/* Header Banner - Tone màu Pastel Tím/Hồng thương hiệu SmartPlanna */}
+      {/* Header Banner - Tone màu Pastel Tím/Hồng thương hiệu SmartPlanner */}
       <div className="rounded-3xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-pink-500 p-6 sm:p-8 text-white shadow-xl shadow-purple-500/15">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2">
